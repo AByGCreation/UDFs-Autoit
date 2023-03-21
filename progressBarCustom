@@ -1,0 +1,54 @@
+func progressBarCustom($pbHNDL, $value)
+
+	$value = Round($value, 0)
+
+	if($value > 100) Then
+		$value = 100
+	EndIf
+  
+	if($value < 0) Then
+		$value = 0
+	EndIf
+
+	Local $aPos = ControlGetPos($_hwndWindows_, "", $pbHNDL)
+
+  ;~ $aPos[0] => X du point superieur gauche
+  ;~ $aPos[1] => Y du point superieur gauche
+  ;~ $aPos[2] => Width
+  ;~ $aPos[3] => Height
+
+	$xStart     = 0
+	$yStart     = 0
+	$maxLength  = $aPos[2]
+	$height     = $aPos[3]
+  $uiColorChoosen = 0x000000
+
+	$valpc = Round((($value * ($maxLength - $xStart)) / 100), 0)
+
+	GUICtrlSetGraphic($pbHNDL, $GUI_GR_COLOR, 0xffffff, $uiColorChoosen) ;
+	GUICtrlSetGraphic($pbHNDL, $GUI_GR_RECT, $xStart, $yStart, $xStart + $valpc, $height)
+
+	GUICtrlSetGraphic($pbHNDL, $GUI_GR_COLOR, 0xffffff, 0xffffff) ; 
+	GUICtrlSetGraphic($pbHNDL, $GUI_GR_RECT, $valpc, $yStart, $maxLength - $valpc, $height) ;
+	GuiCtrlSetData($lbPbValuePC, $value & " %")
+	
+	refeshUI($aPos[0], $aPos[1], $aPos[2] + $aPos[0], $aPos[1] + $aPos[3])
+
+EndFunc   ;==>progressBarCustom
+
+;~ _-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+
+func refeshUI($x, $y, $w, $l)
+
+	;Global Const $tagRECT = "struct; long Left;long Top;long Right;long Bottom; endstruct"
+	local $struct = DllStructCreate($tagRECT)
+	DllStructSetData($struct, "Left", $x)
+	DllStructSetData($struct, "Top", $y)
+	DllStructSetData($struct, "Right", $w)
+	DllStructSetData($struct, "Bottom", $l) 
+  
+	local $Pointer = DllStructGetPtr($struct)
+
+	_WinAPI_RedrawWindow($_hwndWindows_, $Pointer)
+
+EndFunc   ;==>refeshUI
